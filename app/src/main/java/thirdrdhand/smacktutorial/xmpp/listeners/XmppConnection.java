@@ -12,6 +12,7 @@ import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.chat2.ChatManager;
 import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.sasl.provided.SASLDigestMD5Mechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
@@ -33,13 +34,13 @@ public class XmppConnection implements ConnectionListener {
 
 
 
-    private  final Context mApplicationContext;
+    public   final Context mApplicationContext;
     private String mUsername;
     private String mPassword;
     private  final String mServiceName ="localhost";
     private  final String mHost ="192.168.1.200";
     private  final int mPort = 5222;
-
+    ChatManager mChatManager;
 
     private XMPPTCPConnection mConnection;
     private ConnectionState mConnectionStatus;
@@ -78,6 +79,8 @@ public class XmppConnection implements ConnectionListener {
         builder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
         mConnection = new XMPPTCPConnection(builder.build());
+
+        //
         mConnection.addConnectionListener(this);
         mConnection.connect();
         SASLMechanism mechanism = new SASLDigestMD5Mechanism();
@@ -85,15 +88,18 @@ public class XmppConnection implements ConnectionListener {
         SASLAuthentication.blacklistSASLMechanism("SCRAM-SHA-1");
         SASLAuthentication.unBlacklistSASLMechanism("DIGEST-MD5");
         mConnection.login();
-        //Set up the ui thread broadcast message receiver.
-        //setupUiThreadBroadCastMessageReceiver();
+        //
+        mChatManager =ChatManager.getInstanceFor(mConnection);
+        mChatManager.addIncomingListener(new MessageListener());
 
+
+        //
         ReconnectionManager reconnectionManager= ReconnectionManager.getInstanceFor(mConnection);
         reconnectionManager.setEnabledPerDefault(true);
         reconnectionManager.enableAutomaticReconnection();
 
 
-
+        //Adding
 
     }
 
@@ -112,6 +118,7 @@ public class XmppConnection implements ConnectionListener {
     public void connected(XMPPConnection connection) {
             mConnectionStatus=ConnectionState.CONNECTED;
         Log.d(TAG,"Connected successfully");
+
     }
 
     @Override
@@ -122,7 +129,7 @@ public class XmppConnection implements ConnectionListener {
         showMainActivity();
     }
 
-    private void showMainActivity() {
+    public void showMainActivity() {
         Intent i = new Intent(XmppService.UI_AUTHENTICATED);
         i.setPackage(mApplicationContext.getPackageName());
         mApplicationContext.sendBroadcast(i);

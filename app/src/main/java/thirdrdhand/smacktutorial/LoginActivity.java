@@ -43,19 +43,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void checkLogin() {
-    if(XmppService.getState().equals(XmppConnection.ConnectionState.AUTHENTICATED)
-            &&XmppService.getLoggedInState().equals(XmppConnection.LoggedInState.LOGGED_IN)){
 
-        Continue();
-    }else{
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
        rememberMe= prefs.getBoolean("remember_login",false);
-        if(rememberMe){
+        String username =prefs.getString("username",null);
+        String password=prefs.getString("password",null);
 
-            Login(prefs.getString("username",""),prefs.getString("password",""));
+        if(!username.equals("") && !password.equals("")) {
+            if (rememberMe)
+                Login(username, password);
+
         }
-
-    }
     }
 
     private void initView() {
@@ -63,7 +61,9 @@ public class LoginActivity extends AppCompatActivity {
         etPassword= (EditText) findViewById(R.id.etlogin_password);
         btLogin= (Button) findViewById(R.id.btlogin_login);
         cbRememberMe=(CheckBox) findViewById(R.id.cblogin_remember) ;
-        pbLogin= (ProgressBar) findViewById(R.id.pblogin); pbLogin.setMax(100);
+        pbLogin= (ProgressBar) findViewById(R.id.pblogin);
+        pbLogin.setIndeterminate(true);
+        showProgress(false);
         cbRememberMe.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -75,16 +75,17 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String username= etUsername.getText().toString();
                 String password=etPassword.getText().toString();
-                Login(username,password);
+                if(username!=null && password!=null)
+                    Login(username,password);
             }
         });
     }
 
     private void Login(String username,String password) {
         Log.d(TAG,"Login() Called");
-        showProgress(30);
+        showProgress(true);
        // if(rememberMe)
-            saveCredentialsAndLogin(username,password);
+        saveCredentialsAndLogin(username,password);
     }
 
 
@@ -102,7 +103,6 @@ public class LoginActivity extends AppCompatActivity {
         //Start the service
         Intent i1 = new Intent(this,XmppService.class);
         startService(i1);
-        showProgress(50);
 
     }
     @Override
@@ -114,6 +114,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkLogin();
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -128,27 +129,29 @@ public class LoginActivity extends AppCompatActivity {
                         break;
                     case XmppService.CONNECTION_FAILURE:
                         Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
-                        showProgress(0);
+                        showProgress(true);
                         break;
                 }
 
             }
         };
 
-        IntentFilter filter = new IntentFilter(XmppService.UI_AUTHENTICATED);
-        this.registerReceiver(mBroadcastReceiver, filter);
+        IntentFilter filter1 = new IntentFilter(XmppService.UI_AUTHENTICATED);
+        IntentFilter filter2 = new IntentFilter(XmppService.CONNECTION_FAILURE);
+        this.registerReceiver(mBroadcastReceiver, filter1);
+        this.registerReceiver(mBroadcastReceiver, filter2);
     }
 
     private void Continue() {
-        showProgress(100);
+        showProgress(false);
 
         Intent i2 = new Intent(mContext,MainActivity.class);
         startActivity(i2);
         finish();
     }
 
-    private void showProgress(int  progress) {
-        pbLogin.setProgress(progress);
+    private void showProgress(boolean  progress) {
+        pbLogin.setVisibility(progress?View.VISIBLE:View.INVISIBLE);
 
     }
 }

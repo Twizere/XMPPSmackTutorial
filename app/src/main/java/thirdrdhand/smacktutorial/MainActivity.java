@@ -29,8 +29,8 @@ public class MainActivity extends Activity {
     private void initView() {
     tvLog=findViewById(R.id.tvmain_activity_log);
         tvLog.append("\t\t\t Successfully Loggen in \n");
-        tvLog.append("____________________________" +
-                "_________________________________\n");
+        tvLog.append("____________________" +
+                "_________________________\n");
     }
 
     @Override
@@ -42,13 +42,30 @@ public class MainActivity extends Activity {
                     String action=intent.getAction();
                 switch (action){
                     case XmppService.BACKEND_CMD:
-                        tvLog.append("Received Command \n");
+                        showLog("Received New Command :");
+                        break;
+                    case XmppService.RECEIVED_NEW_MSG:
+                        LogMessage(intent);
+
                         break;
                 }
             }
         };
-        IntentFilter filter = new IntentFilter(XmppService.BACKEND_CMD);
-        this.registerReceiver(mBroadCastReceiver,filter);
+        IntentFilter filter1 = new IntentFilter(XmppService.BACKEND_CMD);
+        IntentFilter filter2 = new IntentFilter(XmppService.RECEIVED_NEW_MSG);
+        this.registerReceiver(mBroadCastReceiver,filter1);
+        this.registerReceiver(mBroadCastReceiver,filter2);
+    }
+
+    private void LogMessage(Intent intent) {
+        showLog("Received New Message :");
+        showLog("From -> "+intent.getStringExtra("from"));
+        showLog("Body -> "+intent.getStringExtra("body"));
+        showLog("____________");
+    }
+
+    private void showLog(String s) {
+        tvLog.append(s+ " \n");
     }
 
     @Override
