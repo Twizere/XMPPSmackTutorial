@@ -1,48 +1,59 @@
 package thirdrdhand.smacktutorial;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.app.Activity;
 import android.util.Log;
+import android.widget.TextView;
 
 import thirdrdhand.smacktutorial.xmpp.XmppService;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
-    private static final String TAG = "MainActivity" ;
+    TextView tvLog;
+    private BroadcastReceiver mBroadCastReceiver;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Login();
+        initView();
 
     }
 
-    private void Login() {
-        Log.d(TAG,"Login() Called");
-        String password="123456";
-        String username="pacifique";
-        saveCredentialsAndLogin(username,password);
+    private void initView() {
+    tvLog=findViewById(R.id.tvmain_activity_log);
+        tvLog.append("\t\t\t Successfully Loggen in \n");
+        tvLog.append("____________________________" +
+                "_________________________________\n");
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mBroadCastReceiver= new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                    String action=intent.getAction();
+                switch (action){
+                    case XmppService.BACKEND_CMD:
+                        tvLog.append("Received Command \n");
+                        break;
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter(XmppService.BACKEND_CMD);
+        this.registerReceiver(mBroadCastReceiver,filter);
+    }
 
-    private void saveCredentialsAndLogin(String username, String password)
-    {
-        Log.d(TAG,"saveCredentialsAndLogin() called.");
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit()
-                .putString("username", username)
-                .putString("password", password)
-                .putBoolean("logged_in",true)
-                .commit();
-
-        //Start the service
-        Intent i1 = new Intent(this,XmppService.class);
-        startService(i1);
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        this.unregisterReceiver(mBroadCastReceiver);
     }
 }

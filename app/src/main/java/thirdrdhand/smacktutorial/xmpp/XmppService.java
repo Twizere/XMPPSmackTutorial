@@ -19,6 +19,11 @@ import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
 
 public class XmppService extends Service {
     private static final String TAG ="XmppService";
+    public static final String UI_AUTHENTICATED = "LOGIN_ACTIVITY_LOGIN";
+    public static final String CONNECTION_FAILURE = "FAILED_TO_CONNECT";
+    public static final String BACKEND_CMD = "BACKEND_COMMAND";
+
+
     private boolean mActive;//Stores whether or not the thread is active
     private Thread mThread;
     private Handler mTHandler;//We use this handler to post messages to
