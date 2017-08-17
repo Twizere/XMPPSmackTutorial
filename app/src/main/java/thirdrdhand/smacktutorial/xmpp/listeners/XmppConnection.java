@@ -23,7 +23,13 @@ import org.jxmpp.jid.impl.JidCreate;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import thirdrdhand.smacktutorial.xmpp.XmppService;
+import thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS;
+import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
+import thirdrdhand.smacktutorial.xmpp.constants.TYPES;
+
+import static thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS.Auth.Password;
+import static thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS.Auth.Username;
+import static thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS.Server.ServiceName;
 
 /**
  * Created by pacit on 2017/08/14.
@@ -35,46 +41,34 @@ public class XmppConnection implements ConnectionListener {
 
 
     public   final Context mApplicationContext;
-    private String mUsername;
-    private String mPassword;
-    private  final String mServiceName ="localhost";
-    private  final String mHost ="192.168.1.200";
-    private  final int mPort = 5222;
     ChatManager mChatManager;
 
     private XMPPTCPConnection mConnection;
-    private ConnectionState mConnectionStatus;
+    private TYPES.ConnectionState mConnectionStatus;
+    private TYPES.LogInState mLoginState;
 
-    public static enum ConnectionState
-    {
-        CONNECTED ,AUTHENTICATED, CONNECTING ,DISCONNECTING ,DISCONNECTED;
-    }
-    public static enum LoggedInState
-    {
-        LOGGED_IN , LOGGED_OUT;
-    }
 
     public XmppConnection(Context context){
         Log.d(TAG,"Connection Constructor called");
         mApplicationContext=context.getApplicationContext();
 
-        mUsername= PreferenceManager.getDefaultSharedPreferences(mApplicationContext)
+        Username= PreferenceManager.getDefaultSharedPreferences(mApplicationContext)
                 .getString("username",null);
-        mPassword=PreferenceManager.getDefaultSharedPreferences(mApplicationContext)
+        Password=PreferenceManager.getDefaultSharedPreferences(mApplicationContext)
                 .getString("password",null);
 
-        if(mUsername==null ) mUsername="";
-        if(mPassword==null) mPassword="";
+        if(Username==null ) Username="";
+        if(Password==null) Password="";
     }
 
     public void connect() throws IOException, SmackException, XMPPException, InterruptedException {
-        Log.d(TAG, "connectting to Server : "+ mServiceName);
-        DomainBareJid domainBareJid = JidCreate.domainBareFrom(mServiceName) ;
+        Log.d(TAG, "connectting to Server : "+ ServiceName);
+        DomainBareJid domainBareJid = JidCreate.domainBareFrom( ServiceName) ;
         XMPPTCPConnectionConfiguration.Builder builder=
                 XMPPTCPConnectionConfiguration.builder();
         builder.setServiceName(domainBareJid);
-        builder.setHostAddress(InetAddress.getByName(mHost));
-        builder.setUsernameAndPassword(mUsername, mPassword);
+        builder.setHostAddress(InetAddress.getByName( CREDENTIALS.Server.Host));
+        builder.setUsernameAndPassword( Username, Password);
         builder.setResource("resource");
         builder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
@@ -105,7 +99,7 @@ public class XmppConnection implements ConnectionListener {
 
     public void disconnect(){
 
-        Log.d(TAG,"Disconnecting from Server "+ mServiceName);
+        Log.d(TAG,"Disconnecting from Server "+ ServiceName);
 
         if(mConnection!=null){
             mConnection.disconnect();
@@ -116,21 +110,21 @@ public class XmppConnection implements ConnectionListener {
     }
     @Override
     public void connected(XMPPConnection connection) {
-            mConnectionStatus=ConnectionState.CONNECTED;
+            mConnectionStatus= TYPES.ConnectionState.CONNECTED;
         Log.d(TAG,"Connected successfully");
 
     }
 
     @Override
     public void authenticated(XMPPConnection connection, boolean resumed) {
-        mConnectionStatus=ConnectionState.AUTHENTICATED;
+        mConnectionStatus= TYPES.ConnectionState.AUTHENTICATED;
         Log.d(TAG,"AUTHENTICATED successfully");
 
         showMainActivity();
     }
 
     public void showMainActivity() {
-        Intent i = new Intent(XmppService.UI_AUTHENTICATED);
+        Intent i = new Intent(KEYS.BroadCast.UI_AUTHENTICATED);
         i.setPackage(mApplicationContext.getPackageName());
         mApplicationContext.sendBroadcast(i);
     }
@@ -138,39 +132,39 @@ public class XmppConnection implements ConnectionListener {
 
     @Override
     public void connectionClosed() {
-        mConnectionStatus=ConnectionState.DISCONNECTED;
+        mConnectionStatus= TYPES.ConnectionState.DISCONNECTED;
         Log.d(TAG,"connection Closed");
         connectionFailure();
     }
 
     @Override
     public void connectionClosedOnError(Exception e) {
-        mConnectionStatus=ConnectionState.DISCONNECTED;
+        mConnectionStatus= TYPES.ConnectionState.DISCONNECTED;
         Log.d(TAG,"ConnectionClosedOnError, error "+ e.toString());
         connectionFailure();
     }
 
     private void connectionFailure() {
-        Intent i = new Intent(XmppService.CONNECTION_FAILURE);
+        Intent i = new Intent(KEYS.BroadCast.CONNECTION_FAILURE);
         i.setPackage(mApplicationContext.getPackageName());
         mApplicationContext.sendBroadcast(i);
     }
 
     @Override
     public void reconnectingIn(int seconds) {
-        mConnectionStatus=ConnectionState.CONNECTING;
+        mConnectionStatus= TYPES.ConnectionState.CONNECTING;
         Log.d(TAG,"ReconnectingIn() " + seconds);
     }
 
     @Override
     public void reconnectionSuccessful() {
-        mConnectionStatus=ConnectionState.CONNECTED;
+        mConnectionStatus= TYPES.ConnectionState.CONNECTED;
         Log.d(TAG,"reconnectionSuccessful() " );
     }
 
     @Override
     public void reconnectionFailed(Exception e) {
-        mConnectionStatus=ConnectionState.DISCONNECTED;
+        mConnectionStatus= TYPES.ConnectionState.DISCONNECTED;
         Log.d(TAG,"reconnection Failed() " );
     }
 }

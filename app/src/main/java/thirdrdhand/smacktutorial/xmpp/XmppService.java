@@ -11,6 +11,7 @@ import android.util.Log;
 
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 
+import thirdrdhand.smacktutorial.xmpp.constants.TYPES;
 import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
 
 /**
@@ -19,18 +20,15 @@ import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
 
 public class XmppService extends Service {
     private static final String TAG ="XmppService";
-    public static final String UI_AUTHENTICATED = "LOGIN_ACTIVITY_LOGIN";
-    public static final String CONNECTION_FAILURE = "FAILED_TO_CONNECT";
-    public static final String BACKEND_CMD = "BACKEND_COMMAND";
-    public static final String RECEIVED_NEW_MSG = "RECEIVED_NEW_MESSAGE";
+
 
 
     private boolean mActive;//Stores whether or not the thread is active
     private Thread mThread;
     private Handler mTHandler;//We use this handler to post messages to
     public static XmppConnection mConnection;
-    private static XmppConnection.ConnectionState mConnectionState;
-    private static XmppConnection.LoggedInState mLoggenInState;
+    private static TYPES.ConnectionState mConnectionState;
+    private static TYPES.LogInState mLogInState;
 
     //the background thread.
 
@@ -45,21 +43,21 @@ public class XmppService extends Service {
 
     }
 
-    public static XmppConnection.ConnectionState getState(){
+    public static TYPES.ConnectionState getState(){
 
         if(mConnectionState == null){
-            return XmppConnection.ConnectionState.DISCONNECTED;
+            return  TYPES.ConnectionState.DISCONNECTED;
 
         }
         return mConnectionState;
     }
-    public static XmppConnection.LoggedInState getLoggedInState(){
+    public static TYPES.LogInState getLoggedInState(){
 
         if(mConnectionState == null){
-            return XmppConnection.LoggedInState.LOGGED_OUT;
+            return TYPES.LogInState.LOGGED_OUT;
 
         }
-        return mLoggenInState;
+        return mLogInState;
     }
 
 

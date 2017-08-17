@@ -1,4 +1,4 @@
-package thirdrdhand.smacktutorial;
+package thirdrdhand.smacktutorial.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,8 +17,13 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import thirdrdhand.smacktutorial.ApplicationOffice;
+import thirdrdhand.smacktutorial.R;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
-import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
+import thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS;
+import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
+
+
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -45,14 +50,19 @@ public class LoginActivity extends AppCompatActivity {
     private void checkLogin() {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-       rememberMe= prefs.getBoolean("remember_login",false);
-        String username =prefs.getString("username",null);
-        String password=prefs.getString("password",null);
+       rememberMe= prefs.getBoolean(KEYS.PREF.Auth.AUTO_LOGIN,false);
+        String username =prefs.getString(KEYS.PREF.Auth.USERNAME,null);
+        String password=prefs.getString(KEYS.PREF.Auth.PASSWORD,null);
 
-        if(!username.equals("") && !password.equals("")) {
-            if (rememberMe)
-                Login(username, password);
+        if(username==null || password ==null){
 
+            //startActivity To Login
+        }else {
+            if (!username.equals("") && !password.equals("")) {
+                if (rememberMe)
+                    Login(username, password);
+
+            }
         }
     }
 
@@ -84,27 +94,14 @@ public class LoginActivity extends AppCompatActivity {
     private void Login(String username,String password) {
         Log.d(TAG,"Login() Called");
         showProgress(true);
-       // if(rememberMe)
-        saveCredentialsAndLogin(username,password);
-    }
-
-
-    private void saveCredentialsAndLogin(String username, String password)
-    {
-        Log.d(TAG,"saveCredentialsAndLogin() called.");
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit()
-                .putString("username", username)
-                .putString("password", password)
-                .putBoolean("logged_in",true)
-                .putBoolean("remember_login",rememberMe)
-                .commit();
 
         //Start the service
         Intent i1 = new Intent(this,XmppService.class);
         startService(i1);
-
     }
+
+
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -122,12 +119,14 @@ public class LoginActivity extends AppCompatActivity {
                 String action = intent.getAction();
                 switch (action)
                 {
-                    case XmppService.UI_AUTHENTICATED:
+                    case KEYS.BroadCast.UI_AUTHENTICATED:
                         Log.d(TAG,"Got a broadcast to show the main app window");
+                        if(rememberMe)
+                            new ApplicationOffice(getApplicationContext()).saveCredentials(CREDENTIALS.Auth.Username,CREDENTIALS.Auth.Password);
                         //Show the main app window
                         Continue();
                         break;
-                    case XmppService.CONNECTION_FAILURE:
+                    case KEYS.BroadCast.CONNECTION_FAILURE:
                         Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
                         showProgress(true);
                         break;
@@ -136,8 +135,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-        IntentFilter filter1 = new IntentFilter(XmppService.UI_AUTHENTICATED);
-        IntentFilter filter2 = new IntentFilter(XmppService.CONNECTION_FAILURE);
+        IntentFilter filter1 = new IntentFilter(KEYS.BroadCast.UI_AUTHENTICATED);
+        IntentFilter filter2 = new IntentFilter(KEYS.BroadCast.CONNECTION_FAILURE);
         this.registerReceiver(mBroadcastReceiver, filter1);
         this.registerReceiver(mBroadcastReceiver, filter2);
     }

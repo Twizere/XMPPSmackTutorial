@@ -1,4 +1,4 @@
-package thirdrdhand.smacktutorial;
+package thirdrdhand.smacktutorial.activities;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.app.Activity;
-import android.util.Log;
 import android.widget.TextView;
 
-import thirdrdhand.smacktutorial.xmpp.XmppService;
+import thirdrdhand.smacktutorial.R;
+import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
 
 public class MainActivity extends Activity {
 
@@ -41,18 +41,18 @@ public class MainActivity extends Activity {
             public void onReceive(Context context, Intent intent) {
                     String action=intent.getAction();
                 switch (action){
-                    case XmppService.BACKEND_CMD:
+                    case KEYS.BroadCast.BACKEND_CMD:
                         showLog("Received New Command :");
                         break;
-                    case XmppService.RECEIVED_NEW_MSG:
+                    case KEYS.BroadCast.RECEIVED_NEW_MESSAGE:
                         LogMessage(intent);
 
                         break;
                 }
             }
         };
-        IntentFilter filter1 = new IntentFilter(XmppService.BACKEND_CMD);
-        IntentFilter filter2 = new IntentFilter(XmppService.RECEIVED_NEW_MSG);
+        IntentFilter filter1 = new IntentFilter(KEYS.BroadCast.BACKEND_CMD);
+        IntentFilter filter2 = new IntentFilter(KEYS.BroadCast.RECEIVED_NEW_MESSAGE);
         this.registerReceiver(mBroadCastReceiver,filter1);
         this.registerReceiver(mBroadCastReceiver,filter2);
     }
