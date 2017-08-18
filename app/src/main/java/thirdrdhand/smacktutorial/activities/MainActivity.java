@@ -1,11 +1,11 @@
 package thirdrdhand.smacktutorial.activities;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.app.Activity;
 import android.widget.TextView;
 
 import thirdrdhand.smacktutorial.R;
@@ -59,8 +59,8 @@ public class MainActivity extends Activity {
 
     private void LogMessage(Intent intent) {
         showLog("Received New Message :");
-        showLog("From -> "+intent.getStringExtra("from"));
-        showLog("Body -> "+intent.getStringExtra("body"));
+        showLog("From -> " + intent.getStringExtra(KEYS.EXTRA.XMPP.Message.FROM));
+        showLog("Body -> " + intent.getStringExtra(KEYS.EXTRA.XMPP.Message.BODY));
         showLog("____________");
     }
 

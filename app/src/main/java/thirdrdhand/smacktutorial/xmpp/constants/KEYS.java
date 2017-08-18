@@ -6,6 +6,8 @@ package thirdrdhand.smacktutorial.xmpp.constants;
 
 public class KEYS {
 
+    public static final String SHARED_PREFERENCES = "KEYS-SHARED_PREFERENCES";
+
     /**
      * BroadCast Receiver Constatants
      */

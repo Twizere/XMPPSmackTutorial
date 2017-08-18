@@ -4,10 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,7 +19,6 @@ import android.widget.Toast;
 import thirdrdhand.smacktutorial.ApplicationOffice;
 import thirdrdhand.smacktutorial.R;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
-import thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS;
 import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
 
 
@@ -28,9 +26,9 @@ import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LOGIN_ACTIVITY" ;
+    Handler handler;
     private BroadcastReceiver mBroadcastReceiver;
     private Context mContext;
-
     private EditText etUsername,etPassword;
     private Button btLogin;
     private CheckBox cbRememberMe;
@@ -43,28 +41,11 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         initView();
         mContext=getApplicationContext();
-        checkLogin();
+        handler = new Handler();
 
     }
 
-    private void checkLogin() {
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-       rememberMe= prefs.getBoolean(KEYS.PREF.Auth.AUTO_LOGIN,false);
-        String username =prefs.getString(KEYS.PREF.Auth.USERNAME,null);
-        String password=prefs.getString(KEYS.PREF.Auth.PASSWORD,null);
-
-        if(username==null || password ==null){
-
-            //startActivity To Login
-        }else {
-            if (!username.equals("") && !password.equals("")) {
-                if (rememberMe)
-                    Login(username, password);
-
-            }
-        }
-    }
 
     private void initView() {
     etUsername= (EditText) findViewById(R.id.etlogin_username);
@@ -92,9 +73,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void Login(String username,String password) {
-        Log.d(TAG,"Login() Called");
+        Log.w(TAG, "Login() Called");
         showProgress(true);
-
+        XmppService.loginUsername = username;
+        XmppService.loginPassword = password;
         //Start the service
         Intent i1 = new Intent(this,XmppService.class);
         startService(i1);
@@ -111,7 +93,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        checkLogin();
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -120,15 +101,13 @@ public class LoginActivity extends AppCompatActivity {
                 switch (action)
                 {
                     case KEYS.BroadCast.UI_AUTHENTICATED:
-                        Log.d(TAG,"Got a broadcast to show the main app window");
-                        if(rememberMe)
-                            new ApplicationOffice(getApplicationContext()).saveCredentials(CREDENTIALS.Auth.Username,CREDENTIALS.Auth.Password);
+                        Log.w(TAG, "Got a broadcast to show the main app window");
                         //Show the main app window
                         Continue();
                         break;
                     case KEYS.BroadCast.CONNECTION_FAILURE:
                         Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
-                        showProgress(true);
+                        showProgress(false);
                         break;
                 }
 
@@ -143,14 +122,23 @@ public class LoginActivity extends AppCompatActivity {
 
     private void Continue() {
         showProgress(false);
-
+        if (rememberMe)
+            ApplicationOffice.saveCredentials(getApplicationContext(),
+                    etUsername.getText().toString(),
+                    etPassword.getText().toString());
         Intent i2 = new Intent(mContext,MainActivity.class);
         startActivity(i2);
-        finish();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        }, 1000);
     }
 
     private void showProgress(boolean  progress) {
         pbLogin.setVisibility(progress?View.VISIBLE:View.INVISIBLE);
 
     }
+
 }

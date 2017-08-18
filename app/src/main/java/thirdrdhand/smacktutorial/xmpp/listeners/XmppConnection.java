@@ -2,7 +2,8 @@ package thirdrdhand.smacktutorial.xmpp.listeners;
 
 import android.content.Context;
 import android.content.Intent;
-import android.preference.PreferenceManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -41,34 +42,31 @@ public class XmppConnection implements ConnectionListener {
 
 
     public   final Context mApplicationContext;
+    public XMPPTCPConnection mConnection;
+    public TYPES.ConnectionState mConnectionStatus;
+    public TYPES.LogInState mLoginState;
     ChatManager mChatManager;
 
-    private XMPPTCPConnection mConnection;
-    private TYPES.ConnectionState mConnectionStatus;
-    private TYPES.LogInState mLoginState;
 
-
-    public XmppConnection(Context context){
-        Log.d(TAG,"Connection Constructor called");
-        mApplicationContext=context.getApplicationContext();
-
-        Username= PreferenceManager.getDefaultSharedPreferences(mApplicationContext)
-                .getString("username",null);
-        Password=PreferenceManager.getDefaultSharedPreferences(mApplicationContext)
-                .getString("password",null);
-
-        if(Username==null ) Username="";
-        if(Password==null) Password="";
+    public XmppConnection(Context context) {
+        Log.w(TAG, "Connection Constructor called");
+        mApplicationContext = context.getApplicationContext();
     }
 
-    public void connect() throws IOException, SmackException, XMPPException, InterruptedException {
-        Log.d(TAG, "connectting to Server : "+ ServiceName);
+
+    public void connect(String username, String password) throws IOException, SmackException, XMPPException, InterruptedException {
+        Log.w(TAG, "connectting to Server : " + ServiceName);
+        if (!amIconnected()) {
+            connectionFailure();
+            return;
+        }
+
         DomainBareJid domainBareJid = JidCreate.domainBareFrom( ServiceName) ;
         XMPPTCPConnectionConfiguration.Builder builder=
                 XMPPTCPConnectionConfiguration.builder();
         builder.setServiceName(domainBareJid);
         builder.setHostAddress(InetAddress.getByName( CREDENTIALS.Server.Host));
-        builder.setUsernameAndPassword( Username, Password);
+        builder.setUsernameAndPassword(username, password);
         builder.setResource("resource");
         builder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
@@ -94,12 +92,31 @@ public class XmppConnection implements ConnectionListener {
 
 
         //Adding
+        Username = username;
+        Password = password;
+    }
 
+    private boolean amIconnected() {
+        ConnectivityManager conMgr = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (conMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED
+                || conMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+
+            // notify user you are online
+            return true;
+
+        } else if (conMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.DISCONNECTED
+                || conMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.DISCONNECTED) {
+
+            return false;
+        } else {
+            return false;
+        }
     }
 
     public void disconnect(){
 
-        Log.d(TAG,"Disconnecting from Server "+ ServiceName);
+        Log.w(TAG, "Disconnecting from Server " + ServiceName);
 
         if(mConnection!=null){
             mConnection.disconnect();
@@ -111,14 +128,15 @@ public class XmppConnection implements ConnectionListener {
     @Override
     public void connected(XMPPConnection connection) {
             mConnectionStatus= TYPES.ConnectionState.CONNECTED;
-        Log.d(TAG,"Connected successfully");
+        Log.w(TAG, "Connected successfully");
 
     }
 
     @Override
     public void authenticated(XMPPConnection connection, boolean resumed) {
         mConnectionStatus= TYPES.ConnectionState.AUTHENTICATED;
-        Log.d(TAG,"AUTHENTICATED successfully");
+        mLoginState = TYPES.LogInState.LOGGED_IN;
+        Log.w(TAG, "AUTHENTICATED successfully");
 
         showMainActivity();
     }
@@ -133,15 +151,16 @@ public class XmppConnection implements ConnectionListener {
     @Override
     public void connectionClosed() {
         mConnectionStatus= TYPES.ConnectionState.DISCONNECTED;
-        Log.d(TAG,"connection Closed");
+        Log.w(TAG, "connection Closed");
         connectionFailure();
     }
 
     @Override
     public void connectionClosedOnError(Exception e) {
         mConnectionStatus= TYPES.ConnectionState.DISCONNECTED;
-        Log.d(TAG,"ConnectionClosedOnError, error "+ e.toString());
+        Log.w(TAG, "ConnectionClosedOnError, error " + e.toString());
         connectionFailure();
+
     }
 
     private void connectionFailure() {
@@ -153,7 +172,7 @@ public class XmppConnection implements ConnectionListener {
     @Override
     public void reconnectingIn(int seconds) {
         mConnectionStatus= TYPES.ConnectionState.CONNECTING;
-        Log.d(TAG,"ReconnectingIn() " + seconds);
+        Log.w(TAG, "ReconnectingIn() " + seconds);
     }
 
     @Override

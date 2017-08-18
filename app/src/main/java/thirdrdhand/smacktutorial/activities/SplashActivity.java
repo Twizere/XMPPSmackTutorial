@@ -2,12 +2,16 @@ package thirdrdhand.smacktutorial.activities;
 
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -15,25 +19,28 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import thirdrdhand.smacktutorial.ApplicationOffice;
 import thirdrdhand.smacktutorial.R;
 import thirdrdhand.smacktutorial.smoothanimation.AnimatorPath;
 import thirdrdhand.smacktutorial.smoothanimation.PathEvaluator;
 import thirdrdhand.smacktutorial.smoothanimation.PathPoint;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
+import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
 import thirdrdhand.smacktutorial.xmpp.constants.TYPES;
 
 public class SplashActivity extends Activity {
+    private static final String TAG = "SPLASH_ACTIVITY";
     Handler handler;
     SoundPool soundPool;
     HashMap<Integer, Integer> soundPoolMap;
     int siID = 1;   //si
     int doID = 2;   //do
-
     TextView tvSiOut,tvSiIn,tvDoOut,tvDoIn, tvSendMoney,tvReceiveMoney,
             tvSIDO,tvMoneyTransfer;
+    PathEvaluator mEvaluator = new PathEvaluator();
+    private BroadcastReceiver mBroadcastReceiver;
     private int timer_count=0;
 
-    PathEvaluator mEvaluator = new PathEvaluator();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,17 +48,50 @@ public class SplashActivity extends Activity {
         //Initialization
        initView();
         //Loading Sounds
-        initSound();
-        //Initialise Handler or Timer
-        initHandler();
+        if (XmppService.getLoggedInState() == TYPES.LogInState.LOGGED_IN) {
+            startActivity(new Intent(SplashActivity.this, MainActivity.class));
+            finish();
+        } else {
+            initSound();
+            //Initialise Handler or Timer
+            initHandler();
 
+            checkLogin();
 
-
+        }
 
 
 
     }
 
+    private void Login(String username, String password) {
+        Log.w(TAG, "Login() Called");
+
+        //Start the service
+        Intent i1 = new Intent(this, XmppService.class);
+        XmppService.loginUsername = username;
+        XmppService.loginPassword = password;
+        startService(i1);
+    }
+
+    private void checkLogin() {
+
+        SharedPreferences prefs = ApplicationOffice.getPrefs(getApplicationContext());
+        boolean rememberMe = prefs.getBoolean(KEYS.PREF.Auth.AUTO_LOGIN, false);
+        String username = prefs.getString(KEYS.PREF.Auth.USERNAME, null);
+        String password = prefs.getString(KEYS.PREF.Auth.PASSWORD, null);
+
+        if (username == null || password == null) {
+
+            Login("0", "0");
+        } else {
+            if (!username.equals("") && !password.equals("")) {
+                if (rememberMe)
+                    Login(username, password);
+
+            }
+        }
+    }
     private void initView() {
 
         tvDoIn= findViewById(R.id.tvSplash_do_inner);
@@ -69,6 +109,7 @@ public class SplashActivity extends Activity {
     }
 
     private void initHandler() {
+        handler = new Handler();
          Timer timer= new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -83,11 +124,8 @@ public class SplashActivity extends Activity {
                  *
                  */
                 if(timer_count>30){
-                    if(XmppService.getLoggedInState()== TYPES.LogInState.LOGGED_IN)
-                        startActivity(new Intent(SplashActivity.this,MainActivity.class));
-                    else startActivity(new Intent(SplashActivity.this,LoginActivity.class));
+
                     this.cancel();
-                    finish();
 
 
                 }
@@ -232,5 +270,61 @@ public class SplashActivity extends Activity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        super.onResume();
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String action = intent.getAction();
+                switch (action) {
+                    case KEYS.BroadCast.UI_AUTHENTICATED:
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                                finish();
+                            }
+                        }, (30 - timer_count) * 100); // To make sure that The animation finishes
+
+                        break;
+                    case KEYS.BroadCast.CONNECTION_FAILURE:
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+
+                                //Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
+                                finish();
+                            }
+                        }, (30 - timer_count) * 100); // To make sure that The animation finishes
+
+
+                        break;
+                }
+
+            }
+        };
+
+        IntentFilter filter1 = new IntentFilter(KEYS.BroadCast.UI_AUTHENTICATED);
+        IntentFilter filter2 = new IntentFilter(KEYS.BroadCast.CONNECTION_FAILURE);
+        this.registerReceiver(mBroadcastReceiver, filter1);
+        this.registerReceiver(mBroadcastReceiver, filter2);
+
+
+    }
+
+    private void ReLogin() {
+        checkLogin();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        this.unregisterReceiver(mBroadcastReceiver);
+    }
 
 }
