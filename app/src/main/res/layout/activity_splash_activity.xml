@@ -1,0 +1,117 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/splash_bg_gradient"
+    tools:context=".activities.MainActivity">
+
+<RelativeLayout
+    android:id="@+id/rlSplash_DroupSi"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_centerVertical="true"
+    android:layout_margin="4dp"
+
+    >
+    <TextView
+        android:id="@+id/tvSplash_si"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/circle_ripple"
+        android:visibility="invisible"
+        />
+    <TextView
+        android:id="@+id/tvSplash_si_inner"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_alignStart="@id/tvSplash_si"
+        android:layout_alignLeft="@id/tvSplash_si"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/circle_ripple_inner"
+        android:visibility="invisible"
+        />
+
+
+</RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rlSplash_DroupDo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="4dp"
+        >
+        <TextView
+            android:id="@+id/tvSplash_do"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/circle_ripple"
+            android:visibility="invisible"
+            />
+        <TextView
+            android:id="@+id/tvSplash_do_inner"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_alignStart="@id/tvSplash_do"
+            android:layout_alignLeft="@id/tvSplash_do"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/circle_ripple_inner"
+            android:visibility="invisible"
+            />
+
+
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/tvSplash_sendMoney"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/circle_ripple_inner"
+        android:visibility="invisible"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        />
+    <TextView
+    android:id="@+id/tvSplash_receiveMoney"
+    android:layout_width="30dp"
+    android:layout_height="30dp"
+    android:background="@drawable/circle_ripple_inner"
+    android:visibility="invisible"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentLeft="true"
+    />
+
+
+
+    <TextView
+        android:id="@+id/tvSplash_SIDO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:fontFamily="sans-serif"
+        android:text="SIDO"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        />
+    <TextView
+        android:id="@+id/tvSplash_MoneyTransfer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Money Transfer"
+        android:textSize="40sp"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold|italic"
+        android:layout_below="@+id/tvSplash_SIDO"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:visibility="gone"/>
+</RelativeLayout>
