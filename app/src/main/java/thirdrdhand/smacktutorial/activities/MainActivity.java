@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import thirdrdhand.smacktutorial.R;
-import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
+import thirdrdhand.smacktutorial.constants.KEYS;
 
 public class MainActivity extends Activity {
 

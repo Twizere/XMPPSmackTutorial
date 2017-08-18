@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
+import thirdrdhand.smacktutorial.constants.KEYS;
 
 /**
  * Created by pacit on 2017/08/17.

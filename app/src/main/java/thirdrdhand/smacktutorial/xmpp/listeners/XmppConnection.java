@@ -24,13 +24,13 @@ import org.jxmpp.jid.impl.JidCreate;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS;
-import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
-import thirdrdhand.smacktutorial.xmpp.constants.TYPES;
+import thirdrdhand.smacktutorial.constants.CREDENTIALS;
+import thirdrdhand.smacktutorial.constants.KEYS;
+import thirdrdhand.smacktutorial.constants.TYPES;
 
-import static thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS.Auth.Password;
-import static thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS.Auth.Username;
-import static thirdrdhand.smacktutorial.xmpp.constants.CREDENTIALS.Server.ServiceName;
+import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Auth.Password;
+import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Auth.Username;
+import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Server.ServiceName;
 
 /**
  * Created by pacit on 2017/08/14.

@@ -1,4 +1,4 @@
-package thirdrdhand.smacktutorial.xmpp.constants;
+package thirdrdhand.smacktutorial.constants;
 
 /**
  * Created by pacit on 2017/08/17.

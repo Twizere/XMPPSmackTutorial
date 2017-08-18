@@ -7,8 +7,8 @@ import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jxmpp.jid.EntityBareJid;
 
+import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
-import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
 
 /**
  * Created by pacit on 2017/08/14.

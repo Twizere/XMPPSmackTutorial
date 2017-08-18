@@ -9,7 +9,7 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import thirdrdhand.smacktutorial.xmpp.constants.TYPES;
+import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
 
 /**

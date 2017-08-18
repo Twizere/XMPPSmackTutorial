@@ -21,12 +21,12 @@ import java.util.TimerTask;
 
 import thirdrdhand.smacktutorial.ApplicationOffice;
 import thirdrdhand.smacktutorial.R;
+import thirdrdhand.smacktutorial.constants.KEYS;
+import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.smoothanimation.AnimatorPath;
 import thirdrdhand.smacktutorial.smoothanimation.PathEvaluator;
 import thirdrdhand.smacktutorial.smoothanimation.PathPoint;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
-import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
-import thirdrdhand.smacktutorial.xmpp.constants.TYPES;
 
 public class SplashActivity extends Activity {
     private static final String TAG = "SPLASH_ACTIVITY";

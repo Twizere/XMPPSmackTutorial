@@ -18,8 +18,8 @@ import android.widget.Toast;
 
 import thirdrdhand.smacktutorial.ApplicationOffice;
 import thirdrdhand.smacktutorial.R;
+import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
-import thirdrdhand.smacktutorial.xmpp.constants.KEYS;
 
 
 
