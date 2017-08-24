@@ -27,11 +27,11 @@ public class KEYS {
 
         public static class XMPP {
             public static class Message {
-                public static final String FROM = "KEYS-EXTRA-MESSAGE-FROM";
-                public static final String TO = "KEYS-EXTRA-MESSAGE-TO";
-                public static final String TYPE = "KEYS-EXTRA-MESSAGE-TYPE";
-                public static final String SEND_DATE_TIME = "KEYS-EXTRA-MESSAGE-SEND_DATE_TIME";
-                public static final String BODY ="KEYS-EXTRA-MESSAGE-BODY" ;
+                public static final String RECEIVED_MSG = "KEYS-EXTRA-RECEIVED_MSG";
+//                public static final String TO = "KEYS-EXTRA-MESSAGE-TO";
+//                public static final String TYPE = "KEYS-EXTRA-MESSAGE-TYPE";
+//                public static final String SEND_DATE_TIME = "KEYS-EXTRA-MESSAGE-SEND_DATE_TIME";
+//                public static final String BODY ="KEYS-EXTRA-MESSAGE-BODY" ;
             }
 
 

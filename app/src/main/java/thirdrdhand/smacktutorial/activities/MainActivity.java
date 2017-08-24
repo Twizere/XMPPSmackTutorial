@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import thirdrdhand.smacktutorial.Model.ReceivedMessage;
 import thirdrdhand.smacktutorial.R;
 import thirdrdhand.smacktutorial.constants.KEYS;
 
@@ -59,8 +60,12 @@ public class MainActivity extends Activity {
 
     private void LogMessage(Intent intent) {
         showLog("Received New Message :");
-        showLog("From -> " + intent.getStringExtra(KEYS.EXTRA.XMPP.Message.FROM));
-        showLog("Body -> " + intent.getStringExtra(KEYS.EXTRA.XMPP.Message.BODY));
+        ReceivedMessage message = intent.getParcelableExtra(KEYS.EXTRA.XMPP.Message.RECEIVED_MSG);
+        showLog("Server -> " + message.FromDomain);
+        showLog("From -> " + message.Username);
+        showLog("TYPE -> " + message.mType.Value);
+        showLog("ACTION -> " + message.Payload);
+        showLog("STATUS -> " + message.mStatus.Value);
         showLog("____________");
     }
 

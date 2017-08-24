@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import thirdrdhand.smacktutorial.Storage.BackEndDB;
 import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
 
@@ -84,6 +85,7 @@ public class XmppService extends Service {
                     public void run() {
                         Looper.prepare();
                         initConnection();
+                        initDB();
                         mTHandler= new Handler();
                         Looper.loop();
                     }
@@ -93,6 +95,11 @@ public class XmppService extends Service {
             }
 
         }
+
+    }
+
+    private void initDB() {
+        BackEndDB backEndDb = new BackEndDB(getContext());
 
     }
 
