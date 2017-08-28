@@ -27,6 +27,7 @@ public class MessageParser {
         // {Extension Mode or Message Mode?}
         if (ParsingMode == TYPES.ParsingMode.WITH_EXTENSION) {
 
+            // Extension mode can be done Later
         } else {
             message.msgId = xmppMessage.getStanzaId();
             message.XmppType = xmppMessage.getType() == Message.Type.chat ? 1 : 0;
@@ -53,6 +54,7 @@ public class MessageParser {
                 message.mType = TYPES.MessageType.REQUEST;
             if (bodyParts[0].equals(TYPES.MessageType.INFO.Value))
                 message.mType = TYPES.MessageType.INFO;
+            //
             message.Payload = bodyParts[1];
             message.Content = bodyParts[2];
             message.TimeStamp = getSentTime(xmppMessage);

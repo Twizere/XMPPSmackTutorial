@@ -52,11 +52,16 @@ public class MessageListener implements IncomingChatMessageListener {
         Intent i = new Intent(KEYS.BroadCast.RECEIVED_NEW_MESSAGE);
         i.putExtra(KEYS.EXTRA.XMPP.Message.RECEIVED_MSG, receivedMessage);
 
+        //Initiating The Task;
+        //Decide the Ussd based on the Payload
+        //Launch the Ussd
+        //Record a Transaction <Phone number, Amount, >
 
         XmppService.mConnection.mApplicationContext.sendBroadcast(i);
 
 
     }
+
 
     private boolean IsMine(ReceivedMessage receivedMessage) {
         boolean isMine = true;

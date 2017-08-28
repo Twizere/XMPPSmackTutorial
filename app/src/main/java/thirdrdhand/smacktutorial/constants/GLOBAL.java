@@ -8,6 +8,7 @@ public class GLOBAL {
 
 
     public static final String XMPP_BODY_SPLIT = "_SIDO_";
+    public static final String BODY_CONTENT_SPLIT = "__";
     public static boolean FilterMyServer = false;
 
     public static class SPLASH_ACTIVITY{

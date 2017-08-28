@@ -1,19 +1,30 @@
 package thirdrdhand.smacktutorial.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.TextView;
 
 import thirdrdhand.smacktutorial.Model.ReceivedMessage;
 import thirdrdhand.smacktutorial.R;
+import thirdrdhand.smacktutorial.constants.GLOBAL;
 import thirdrdhand.smacktutorial.constants.KEYS;
+import thirdrdhand.smacktutorial.constants.TYPES;
+import thirdrdhand.smacktutorial.ussd_factory.USSDTools;
+import thirdrdhand.smacktutorial.ussd_factory.USSD_CMD;
 
 public class MainActivity extends Activity {
 
+    private static final int PERIMISSION_TAG = 12345;
+    private static final String TAG = "MAIN_ACTIVITY";
     TextView tvLog;
     private BroadcastReceiver mBroadCastReceiver;
 
@@ -46,8 +57,8 @@ public class MainActivity extends Activity {
                         showLog("Received New Command :");
                         break;
                     case KEYS.BroadCast.RECEIVED_NEW_MESSAGE:
-                        LogMessage(intent);
-
+                        ReceivedMessage message = intent.getParcelableExtra(KEYS.EXTRA.XMPP.Message.RECEIVED_MSG);
+                        processMessage(message);
                         break;
                 }
             }
@@ -77,5 +88,67 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         this.unregisterReceiver(mBroadCastReceiver);
+    }
+
+    private void processMessage(ReceivedMessage msg) {
+        if (msg == null) {
+
+            Log.e(TAG, "Empty Message");
+
+        }
+
+
+        if (msg.mType.equals(TYPES.MessageType.COMMAND)) {
+
+            if (msg.Payload.equals(TYPES.PayloadType.DEPOSIT_MONEY)) {
+                //The Amount of Money
+                //The Telephone number to send To
+                String[] contentParts = msg.Content.split(GLOBAL.BODY_CONTENT_SPLIT);
+                String phoneNumber = contentParts[0];
+                String amount = contentParts[1];
+
+                //Get The Ussd for Depositing Money in
+                String Ussd = USSD_CMD.TIGO.TIGO_CASH.depositMoneyUssd(phoneNumber, amount);
+                executeUssd(Ussd);
+                //Change the Status of the Message in the Database
+
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.AIRTIME_BALANCE)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.MONEY_BALANCE)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.SEND_MONEY)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.WITHDRAW_MONEY)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.BUY_AIRTIME)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.BUY_CASHPOWER)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.PAY_WATER)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.PAY_SCHOOL_FEES)) {
+
+            } else if (msg.Payload.equals(TYPES.PayloadType.PAY_FUEL)) {
+
+            }
+
+        }
+    }
+
+    private void executeUssd(String ussd) {
+        // Calling the Ussd
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(Intent.ACTION_CALL);
+
+            Uri ussdData = USSDTools.packageForCall(ussd);
+
+            intent.setData(ussdData);
+            startActivity(intent);
+            return;
+        } else {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CALL_PHONE}, PERIMISSION_TAG);
+        }
+
     }
 }

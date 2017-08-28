@@ -42,6 +42,26 @@ public class TYPES {
         }
     }
 
+    public enum PayloadType {
+        AIRTIME_BALANCE("AIRTIME_BALANCE"),
+        MONEY_BALANCE("MONEY_BALANCE"),
+        DEPOSIT_MONEY("DEPOSIT_MONEY"),
+        SEND_MONEY("SEND_MONEY"),
+        WITHDRAW_MONEY("WITHDRAW_MONEY"),
+        BUY_AIRTIME("BUY_AIRTIME"),
+        BUY_CASHPOWER("BUY_CASHPOWER"),
+        PAY_WATER("PAY_WATER"),
+        PAY_FUEL("PAY_FUEL"),
+        PAY_SCHOOL_FEES("PAY_SCHOOL_FEES");
+
+        public final String Value;
+
+        private PayloadType(String value) {
+            Value = value;
+
+        }
+    }
+
     public enum MessageError {
         NONE("NONE"),
         RECEIVING_ERROR("RECEIVING_ERROR"),
