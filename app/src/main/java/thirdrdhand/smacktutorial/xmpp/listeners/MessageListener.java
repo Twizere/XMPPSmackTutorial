@@ -62,7 +62,6 @@ public class MessageListener implements IncomingChatMessageListener {
 
     }
 
-
     private boolean IsMine(ReceivedMessage receivedMessage) {
         boolean isMine = true;
         if (!receivedMessage.FromDomain.equals(CREDENTIALS.Server.ServiceName))

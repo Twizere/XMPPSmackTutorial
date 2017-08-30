@@ -11,10 +11,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import thirdrdhand.smacktutorial.Model.ReceivedMessage;
 import thirdrdhand.smacktutorial.R;
+import thirdrdhand.smacktutorial.Storage.BackEndDB;
+import thirdrdhand.smacktutorial.activities.transactions.TransactionsActivity;
 import thirdrdhand.smacktutorial.constants.GLOBAL;
 import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.constants.TYPES;
@@ -26,8 +30,9 @@ public class MainActivity extends Activity {
     private static final int PERIMISSION_TAG = 12345;
     private static final String TAG = "MAIN_ACTIVITY";
     TextView tvLog;
+    Button btDetails;
     private BroadcastReceiver mBroadCastReceiver;
-
+    private boolean USSDBUSY = false;
 
 
     @Override
@@ -43,6 +48,13 @@ public class MainActivity extends Activity {
         tvLog.append("\t\t\t Successfully Loggen in \n");
         tvLog.append("____________________" +
                 "_________________________\n");
+        btDetails = findViewById(R.id.btmain_activity_details);
+        btDetails.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, TransactionsActivity.class));
+            }
+        });
     }
 
     @Override
@@ -100,7 +112,7 @@ public class MainActivity extends Activity {
 
         if (msg.mType.equals(TYPES.MessageType.COMMAND)) {
 
-            if (msg.Payload.equals(TYPES.PayloadType.DEPOSIT_MONEY)) {
+            if (msg.Payload.equals(TYPES.PayloadType.DEPOSIT_MONEY.Value)) {
                 //The Amount of Money
                 //The Telephone number to send To
                 String[] contentParts = msg.Content.split(GLOBAL.BODY_CONTENT_SPLIT);
@@ -111,6 +123,8 @@ public class MainActivity extends Activity {
                 String Ussd = USSD_CMD.TIGO.TIGO_CASH.depositMoneyUssd(phoneNumber, amount);
                 executeUssd(Ussd);
                 //Change the Status of the Message in the Database
+                msg.mStatus = TYPES.MessageStatus.PROCESSED;
+                BackEndDB.getInstance(this).updateMsg(msg);
 
 
             } else if (msg.Payload.equals(TYPES.PayloadType.AIRTIME_BALANCE)) {
@@ -138,6 +152,14 @@ public class MainActivity extends Activity {
 
     private void executeUssd(String ussd) {
         // Calling the Ussd
+//        Thread thread= new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                while(!USSDBUSY){
+//
+//                }
+//            }
+//        });
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent(Intent.ACTION_CALL);
 

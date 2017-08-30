@@ -42,7 +42,7 @@ public class USSD_CMD {
         public static class TIGO_CASH {
             //Tigo Cash
             private static String MONEY_BALANCE = "*500#";
-            private static String DEPOSIT_MONEY = "*500#";
+            private static String DEPOSIT_MONEY = "500*%1$s*%2$s*1*123456";
             private static String SEND_MONEY = "*500#";
             private static String WITHDRAW_MONEY = "*500#";
             private static String BUY_AIR_TIME = "*500#";
@@ -60,7 +60,8 @@ public class USSD_CMD {
             public static String depositMoneyUssd(String phoneNumber, String amount) {
 
                 //this needs to be changed
-                return DEPOSIT_MONEY;
+                String ussd = String.format(DEPOSIT_MONEY, phoneNumber, amount);
+                return ussd;
             }
         }
 
