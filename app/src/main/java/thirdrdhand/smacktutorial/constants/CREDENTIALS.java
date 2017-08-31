@@ -22,6 +22,11 @@ public class CREDENTIALS {
         public static String Username;
         public static String Password;
         public static boolean AutoLogin;
+
+        public static boolean isLoggedIn() {
+            return !(Username == null || Password == null);
+
+        }
     }
 
     public static class Modes {

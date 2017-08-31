@@ -19,11 +19,14 @@ import thirdrdhand.smacktutorial.Model.ReceivedMessage;
 import thirdrdhand.smacktutorial.R;
 import thirdrdhand.smacktutorial.Storage.BackEndDB;
 import thirdrdhand.smacktutorial.activities.transactions.TransactionsActivity;
+import thirdrdhand.smacktutorial.constants.CREDENTIALS;
 import thirdrdhand.smacktutorial.constants.GLOBAL;
 import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.ussd_factory.USSDTools;
 import thirdrdhand.smacktutorial.ussd_factory.USSD_CMD;
+
+import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Auth.Username;
 
 public class MainActivity extends Activity {
 
@@ -34,18 +37,25 @@ public class MainActivity extends Activity {
     private BroadcastReceiver mBroadCastReceiver;
     private boolean USSDBUSY = false;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
 
+
+        //Double check you are logged in
+        if (!CREDENTIALS.Auth.isLoggedIn()) {
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            finish();
+
+        }
+
     }
 
     private void initView() {
     tvLog=findViewById(R.id.tvmain_activity_log);
-        tvLog.append("\t\t\t Successfully Loggen in \n");
+        tvLog.append(Username + " is Successfully Logged in \n");
         tvLog.append("____________________" +
                 "_________________________\n");
         btDetails = findViewById(R.id.btmain_activity_details);

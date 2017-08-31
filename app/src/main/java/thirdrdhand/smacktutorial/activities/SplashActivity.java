@@ -284,7 +284,9 @@ public class SplashActivity extends Activity {
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                                Intent bypassLogin = new Intent(SplashActivity.this, MainActivity.class);
+                                // bypassLogin.putExtra("username", CREDENTIALS.Auth.Username);
+                                startActivity(bypassLogin);
                                 finish();
                             }
                         }, (30 - timer_count) * 100); // To make sure that The animation finishes

@@ -16,6 +16,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <receiver android:name=".ussd_factory.CallReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+            </intent-filter>
+        </receiver>
         <activity android:name=".activities.LoginActivity"></activity>
 
         <service android:name=".xmpp.XmppService" />
@@ -37,14 +46,6 @@
             android:name=".activities.transactions.TransactionsActivity"
             android:label="@string/title_activity_transactions"></activity>
 
-        <receiver android:name=".ussd_factory.PhoneCallReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>
