@@ -1,6 +1,7 @@
 package thirdrdhand.smacktutorial.xmpp.listeners;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 
 import org.jivesoftware.smack.chat2.Chat;
@@ -21,8 +22,8 @@ import thirdrdhand.smacktutorial.xmpp.XmppService;
  */
 
 public class MessageListener implements IncomingChatMessageListener {
-
     private static final String TAG = "MESSAGE_LISTENER";
+    Handler handler = new Handler();
 
     @Override
     public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
@@ -49,18 +50,18 @@ public class MessageListener implements IncomingChatMessageListener {
             }
         BackEndDB.getInstance(XmppService.getContext()).save(receivedMessage);
 
+        //Launch The Main Activity No Matter What activity is running
+        XmppService.launchMainActivity();
+
+        //Wait Until the Activity is up
         Intent i = new Intent(KEYS.BroadCast.RECEIVED_NEW_MESSAGE);
         i.putExtra(KEYS.EXTRA.XMPP.Message.RECEIVED_MSG, receivedMessage);
+        XmppService.broadcastDelayed(i, 1000);
 
-        //Initiating The Task;
-        //Decide the Ussd based on the Payload
-        //Launch the Ussd
-        //Record a Transaction <Phone number, Amount, >
-
-        XmppService.mConnection.mApplicationContext.sendBroadcast(i);
 
 
     }
+
 
     private boolean IsMine(ReceivedMessage receivedMessage) {
         boolean isMine = true;

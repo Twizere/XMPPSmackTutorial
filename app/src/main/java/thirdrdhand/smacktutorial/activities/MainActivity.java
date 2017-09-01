@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
 
     private static final int PERIMISSION_TAG = 12345;
     private static final String TAG = "MAIN_ACTIVITY";
+    public static Activity instance;
     TextView tvLog;
     Button btDetails;
     private BroadcastReceiver mBroadCastReceiver;
@@ -42,7 +43,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-
+        instance = this;
 
         //Double check you are logged in
         if (!CREDENTIALS.Auth.isLoggedIn()) {

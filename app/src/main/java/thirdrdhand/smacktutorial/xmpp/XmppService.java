@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import thirdrdhand.smacktutorial.Storage.BackEndDB;
+import thirdrdhand.smacktutorial.activities.MainActivity;
 import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
 
@@ -22,6 +23,7 @@ public class XmppService extends Service {
     public static String loginUsername = "";
     public static String loginPassword = "";
     public static XmppConnection mConnection;
+    private static Handler handler = new Handler();
     private boolean mActive;//Stores whether or not the thread is active
     private Thread mThread;
     private Handler mTHandler;//We use this handler to post messages to
@@ -66,6 +68,26 @@ public class XmppService extends Service {
 
         }
         return mConnection.mApplicationContext;
+    }
+
+    public static void launchMainActivity() {
+
+        if (MainActivity.instance != null)
+            MainActivity.instance.finish();
+        Intent mainActivityIntent = new Intent();
+        mainActivityIntent.setClass(getContext(), MainActivity.class);
+        mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(mainActivityIntent);
+
+    }
+
+    public static void broadcastDelayed(final Intent i, int delay) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                XmppService.mConnection.mApplicationContext.sendBroadcast(i);
+            }
+        }, delay);
     }
 
     @Nullable
