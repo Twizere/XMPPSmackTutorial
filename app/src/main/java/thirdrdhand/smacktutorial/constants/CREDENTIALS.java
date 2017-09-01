@@ -5,16 +5,34 @@ package thirdrdhand.smacktutorial.constants;
  */
 
 public class CREDENTIALS {
+
+
     public static class Server {
-        public static final String ServiceName = "localhost";
-        public static final String Host = "192.168.1.200";
-        public static final int Port = 5222;
-        public static final String WebsiteUser = "pc";
+        public static WORKING_MODE workingMode = WORKING_MODE.INTERNET;
+        public static String ServiceName;
+        public static String Host;
+        public static int Port;
+        public static String WebsiteUser;
 
-//        public static final String ServiceName = "sido";
-//        public static final String Host = "198.181.32.10";
-//        public static final int Port = 5222;
+        public static void generateServerConfig() {
 
+            if (workingMode == WORKING_MODE.LOCAL) {
+                ServiceName = "localhost";
+                Host = "192.168.1.200";
+                Port = 5222;
+                WebsiteUser = "pc";
+            } else if (workingMode == WORKING_MODE.INTERNET) {
+                ServiceName = "sido";
+                Host = "198.181.32.10";
+                Port = 5222;
+                WebsiteUser = "pacifique";
+            }
+        }
+
+        public enum WORKING_MODE {
+            INTERNET, LOCAL;
+
+        }
     }
 
     public static class Auth {

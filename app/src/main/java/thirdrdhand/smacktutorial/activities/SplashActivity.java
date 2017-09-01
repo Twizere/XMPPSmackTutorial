@@ -67,11 +67,14 @@ public class SplashActivity extends Activity {
     private void Login(String username, String password) {
         Log.w(TAG, "Login() Called");
 
+
         //Start the service
         Intent i1 = new Intent(this, XmppService.class);
         XmppService.loginUsername = username;
         XmppService.loginPassword = password;
+
         startService(i1);
+
     }
 
     private void checkLogin() {
@@ -82,8 +85,7 @@ public class SplashActivity extends Activity {
         String password = prefs.getString(KEYS.PREF.Auth.PASSWORD, null);
 
         if (username == null || password == null) {
-
-            Login("0", "0");
+            openLogin();
         } else {
             if (!username.equals("") && !password.equals("")) {
                 if (rememberMe)
@@ -281,30 +283,12 @@ public class SplashActivity extends Activity {
                 String action = intent.getAction();
                 switch (action) {
                     case KEYS.BroadCast.UI_AUTHENTICATED:
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Intent bypassLogin = new Intent(SplashActivity.this, MainActivity.class);
-                                // bypassLogin.putExtra("username", CREDENTIALS.Auth.Username);
-                                startActivity(bypassLogin);
-                                finish();
-                            }
-                        }, (30 - timer_count) * 100); // To make sure that The animation finishes
-
+                        byPassLogin();
                         break;
                     case KEYS.BroadCast.CONNECTION_FAILURE:
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-
-                                //Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
-                                finish();
-                            }
-                        }, (30 - timer_count) * 100); // To make sure that The animation finishes
-
-
+                        Intent i1 = new Intent(SplashActivity.this, XmppService.class);
+                        stopService(i1);
+                        openLogin();
                         break;
                 }
 
@@ -316,6 +300,34 @@ public class SplashActivity extends Activity {
         this.registerReceiver(mBroadcastReceiver, filter1);
         this.registerReceiver(mBroadcastReceiver, filter2);
 
+
+    }
+
+    private void openLogin() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+
+                //Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }, (30 - timer_count) * 100); // To make sure that The animation finishes
+
+
+    }
+
+    private void byPassLogin() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent bypassLoginIntent = new Intent(SplashActivity.this, MainActivity.class);
+                // bypassLoginIntent.putExtra("username", CREDENTIALS.Auth.Username);
+                startActivity(bypassLoginIntent);
+                finish();
+            }
+        }, (30 - timer_count) * 100); // To make sure that The animation finishes
 
     }
 

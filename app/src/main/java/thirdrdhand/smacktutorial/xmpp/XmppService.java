@@ -117,8 +117,9 @@ public class XmppService extends Service {
     }catch (Exception e){
         Log.w(TAG, "Something went wrong while connecting ,make sure the credentials are right and try again");
         e.printStackTrace();
+        mConnection.connectionFailure();
         //Stop the service all together.
-        stopSelf();
+        // stopSelf();
     }
 }
 

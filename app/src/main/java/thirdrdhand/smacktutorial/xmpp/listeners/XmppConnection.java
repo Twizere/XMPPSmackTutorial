@@ -56,6 +56,9 @@ public class XmppConnection implements ConnectionListener {
 
     public void connect(String username, String password) throws IOException, SmackException, XMPPException, InterruptedException {
         Log.w(TAG, "connectting to Server : " + ServiceName);
+
+        CREDENTIALS.Server.generateServerConfig();
+
         if (!amIconnected()) {
             connectionFailure();
             return;
@@ -75,10 +78,12 @@ public class XmppConnection implements ConnectionListener {
         //
         mConnection.addConnectionListener(this);
         mConnection.connect();
+
         SASLMechanism mechanism = new SASLDigestMD5Mechanism();
         SASLAuthentication.registerSASLMechanism(mechanism);
         SASLAuthentication.blacklistSASLMechanism("SCRAM-SHA-1");
         SASLAuthentication.unBlacklistSASLMechanism("DIGEST-MD5");
+
         mConnection.login();
         //
         mChatManager =ChatManager.getInstanceFor(mConnection);
@@ -163,7 +168,7 @@ public class XmppConnection implements ConnectionListener {
 
     }
 
-    private void connectionFailure() {
+    public void connectionFailure() {
         Intent i = new Intent(KEYS.BroadCast.CONNECTION_FAILURE);
         i.setPackage(mApplicationContext.getPackageName());
         mApplicationContext.sendBroadcast(i);

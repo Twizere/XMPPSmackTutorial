@@ -14,7 +14,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import thirdrdhand.smacktutorial.ApplicationOffice;
 import thirdrdhand.smacktutorial.R;
@@ -106,8 +105,11 @@ public class LoginActivity extends AppCompatActivity {
                         Continue();
                         break;
                     case KEYS.BroadCast.CONNECTION_FAILURE:
-                        Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
+                        //  Toast.makeText(getApplicationContext(),"Unable to Login",Toast.LENGTH_LONG).show();
+                        stopService(new Intent(LoginActivity.this, XmppService.class));
                         showProgress(false);
+                        etUsername.setError("Invalid Username or Password");
+                        etPassword.setError("Invalid Username or Password");
                         break;
                 }
 
