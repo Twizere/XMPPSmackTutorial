@@ -14,6 +14,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.jivesoftware.smack.packet.Message;
 
 import thirdrdhand.smacktutorial.Model.ReceivedMessage;
 import thirdrdhand.smacktutorial.R;
@@ -25,6 +28,8 @@ import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.ussd_factory.USSDTools;
 import thirdrdhand.smacktutorial.ussd_factory.USSD_CMD;
+import thirdrdhand.smacktutorial.xmpp.XmppService;
+import thirdrdhand.smacktutorial.xmpp.callbacks.SendMessageListener;
 
 import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Auth.Username;
 
@@ -35,6 +40,7 @@ public class MainActivity extends Activity {
     public static Activity instance;
     TextView tvLog;
     Button btDetails;
+    Button btTest;
     private BroadcastReceiver mBroadCastReceiver;
     private boolean USSDBUSY = false;
 
@@ -60,10 +66,27 @@ public class MainActivity extends Activity {
         tvLog.append("____________________" +
                 "_________________________\n");
         btDetails = findViewById(R.id.btmain_activity_details);
+        btTest = findViewById(R.id.btmain_activity_test);
         btDetails.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MainActivity.this, TransactionsActivity.class));
+            }
+        });
+        btTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                XmppService.mConnection.sendMessage("pc", "GOOD Morning", new SendMessageListener() {
+                    @Override
+                    public void onSendOK(Message msg) {
+                        Toast.makeText(getApplicationContext(), "Sent +:" + msg.getBody() + "...", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onSendFailed(Message msg, String reason) {
+                        Toast.makeText(getApplicationContext(), "SEND FAILED ...BECAUSE: " + reason, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }

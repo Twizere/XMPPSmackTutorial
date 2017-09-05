@@ -65,9 +65,9 @@ public class MessageListener implements IncomingChatMessageListener {
 
     private boolean IsMine(ReceivedMessage receivedMessage) {
         boolean isMine = true;
-        if (!receivedMessage.FromDomain.equals(CREDENTIALS.Server.ServiceName))
+        if (!receivedMessage.FromDomain.equals(CREDENTIALS.Server.getDomain()))
             return false; //From another domain
-        if (!receivedMessage.Username.equals(CREDENTIALS.Server.WebsiteUser))
+        if (!receivedMessage.Username.equals(CREDENTIALS.Server.getWebsiteUser()))
             return false; //From another domain
         return isMine;
     }
