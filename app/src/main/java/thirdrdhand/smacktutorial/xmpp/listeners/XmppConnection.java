@@ -242,6 +242,7 @@ public class XmppConnection implements ConnectionListener {
             String myUser = XmppTools.fullJid(CREDENTIALS.Auth.Username);
             if (to.equals(myUser)) {
                 sendMessageLister.onSendFailed(msg, " Can't send to MySelf");
+                ;
                 return;
             }
             chat.send(msg);
