@@ -1,6 +1,5 @@
 package thirdrdhand.smacktutorial.xmpp.listeners;
 
-import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
@@ -11,9 +10,9 @@ import org.jxmpp.jid.EntityBareJid;
 
 import thirdrdhand.smacktutorial.Model.ReceivedMessage;
 import thirdrdhand.smacktutorial.Storage.BackEndDB;
+import thirdrdhand.smacktutorial.activities.MainActivity;
 import thirdrdhand.smacktutorial.constants.CREDENTIALS;
 import thirdrdhand.smacktutorial.constants.GLOBAL;
-import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.parser.MessageParser;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
 
@@ -51,12 +50,15 @@ public class MessageListener implements IncomingChatMessageListener {
         BackEndDB.getInstance(XmppService.getContext()).save(receivedMessage);
 
         //Launch The Main Activity No Matter What activity is running
-        XmppService.launchMainActivity();
+        //     XmppService.launchMainActivity();
 
         //Wait Until the Activity is up
-        Intent i = new Intent(KEYS.BroadCast.RECEIVED_NEW_MESSAGE);
-        i.putExtra(KEYS.EXTRA.XMPP.Message.RECEIVED_MSG, receivedMessage);
-        XmppService.broadcastDelayed(i, 1000);
+        // Intent i = new Intent(KEYS.BroadCast.RECEIVED_NEW_MESSAGE);
+        //  i.putExtra(KEYS.EXTRA.XMPP.Message.RECEIVED_MSG, receivedMessage);
+        //  XmppService.broadcastDelayed(i, 1000);
+
+        MainActivity main = (MainActivity) MainActivity.instance;
+        main.onServerMessageReceived.onReceive(receivedMessage);
 
 
 

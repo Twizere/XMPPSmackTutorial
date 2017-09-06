@@ -29,6 +29,7 @@ import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.ussd_factory.USSDTools;
 import thirdrdhand.smacktutorial.ussd_factory.USSD_CMD;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
+import thirdrdhand.smacktutorial.xmpp.callbacks.OnServerMessageReceived;
 import thirdrdhand.smacktutorial.xmpp.callbacks.SendMessageListener;
 
 import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Auth.Username;
@@ -38,6 +39,7 @@ public class MainActivity extends Activity {
     private static final int PERIMISSION_TAG = 12345;
     private static final String TAG = "MAIN_ACTIVITY";
     public static Activity instance;
+    public OnServerMessageReceived onServerMessageReceived;
     TextView tvLog;
     Button btDetails;
     Button btTest;
@@ -49,15 +51,41 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        instance = this;
 
+        ListenForServerMessages();
         //Double check you are logged in
         if (!CREDENTIALS.Auth.isLoggedIn()) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
 
         }
+        instance = this;
+    }
 
+    private void ListenForServerMessages() {
+        onServerMessageReceived = new OnServerMessageReceived() {
+            @Override
+            public void onCommandReceive(TYPES.PayloadType commandType, String messageBody, String bodySeparator) {
+
+            }
+
+            @Override
+            public void onRequestReceive(TYPES.PayloadType requestType, ReceivedMessage message) {
+
+            }
+
+            @Override
+            public void onReceive(final ReceivedMessage message) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "RECEIVED MSG: " + message.Content, Toast.LENGTH_LONG).show();
+
+                    }
+                });
+                processMessage(message);
+            }
+        };
     }
 
     private void initView() {
