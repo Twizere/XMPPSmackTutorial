@@ -14,13 +14,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.jivesoftware.smack.packet.Message;
 
 import thirdrdhand.smacktutorial.Model.ReceivedMessage;
 import thirdrdhand.smacktutorial.R;
 import thirdrdhand.smacktutorial.Storage.BackEndDB;
+import thirdrdhand.smacktutorial.activities.auth.LoginActivity;
 import thirdrdhand.smacktutorial.activities.transactions.TransactionsActivity;
 import thirdrdhand.smacktutorial.constants.CREDENTIALS;
 import thirdrdhand.smacktutorial.constants.GLOBAL;
@@ -33,6 +33,7 @@ import thirdrdhand.smacktutorial.xmpp.callbacks.OnServerMessageReceived;
 import thirdrdhand.smacktutorial.xmpp.callbacks.SendMessageListener;
 
 import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Auth.Username;
+import static thirdrdhand.smacktutorial.xmpp.XmppService.MakeToast;
 
 public class MainActivity extends Activity {
 
@@ -79,7 +80,7 @@ public class MainActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(MainActivity.this, "RECEIVED MSG: " + message.Content, Toast.LENGTH_LONG).show();
+                        MakeToast("RECEIVED MSG: " + message.Content);
 
                     }
                 });
@@ -107,12 +108,12 @@ public class MainActivity extends Activity {
                 XmppService.mConnection.sendMessage("pc", "GOOD Morning", new SendMessageListener() {
                     @Override
                     public void onSendOK(Message msg) {
-                        Toast.makeText(getApplicationContext(), "Sent +:" + msg.getBody() + "...", Toast.LENGTH_SHORT).show();
+                        MakeToast("Sent: " + msg.getBody());
                     }
 
                     @Override
                     public void onSendFailed(Message msg, String reason) {
-                        Toast.makeText(getApplicationContext(), "SEND FAILED ...BECAUSE: " + reason, Toast.LENGTH_SHORT).show();
+                        MakeToast("SEND FAILED ...BECAUSE: ");
                     }
                 });
             }

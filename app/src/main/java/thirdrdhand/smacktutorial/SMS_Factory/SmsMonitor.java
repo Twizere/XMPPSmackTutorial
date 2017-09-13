@@ -10,6 +10,7 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 import static android.provider.Telephony.Sms.Intents.getMessagesFromIntent;
+import static thirdrdhand.smacktutorial.xmpp.XmppService.MakeToast;
 
 /**
  * Created by pacit on 2017/09/01.
@@ -44,5 +45,6 @@ public class SmsMonitor extends BroadcastReceiver {
 
 
         String message = sms.getMessageBody();
+        MakeToast(message);
     }
 }

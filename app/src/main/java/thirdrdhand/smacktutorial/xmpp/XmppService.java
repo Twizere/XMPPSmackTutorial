@@ -8,11 +8,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import thirdrdhand.smacktutorial.Storage.BackEndDB;
 import thirdrdhand.smacktutorial.activities.MainActivity;
+import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.constants.TYPES;
-import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
+import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnectionHolder;
 
 /**
  * Created by pacit on 2017/08/14.
@@ -20,10 +22,9 @@ import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnection;
 
 public class XmppService extends Service {
     private static final String TAG ="XmppService";
-    public static String loginUsername = "";
-    public static String loginPassword = "";
-    public static XmppConnection mConnection;
+    public static XmppConnectionHolder mConnection;
     private static Handler handler = new Handler();
+    private static Context mApplicationContext;
     private boolean mActive;//Stores whether or not the thread is active
     private Thread mThread;
     private Handler mTHandler;//We use this handler to post messages to
@@ -58,16 +59,12 @@ public class XmppService extends Service {
     }
 
     public static Context getContext() {
-        try {
-            if (mConnection == null) throw new Exception("Connection is Null");
-            else if (mConnection.mApplicationContext == null)
-                throw new Exception("Context is Null");
 
-        } catch (Exception ex) {
-            Log.e(TAG, ex.getMessage());
+        return mApplicationContext;
+    }
 
-        }
-        return mConnection.mApplicationContext;
+    public static void setContext(Context context) {
+        XmppService.mApplicationContext = context;
     }
 
     public static void launchMainActivity() {
@@ -85,9 +82,26 @@ public class XmppService extends Service {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                XmppService.mConnection.mApplicationContext.sendBroadcast(i);
+                XmppService.mApplicationContext.sendBroadcast(i);
             }
         }, delay);
+    }
+
+    public static void showMainActivity() {
+        Intent i = new Intent(KEYS.BroadCast.UI_AUTHENTICATED);
+        i.setPackage(mApplicationContext.getPackageName());
+        mApplicationContext.sendBroadcast(i);
+    }
+
+    public static void broadCastXmppInfo(String broadcast) {
+        Intent i = new Intent(broadcast);
+        i.setPackage(mApplicationContext.getPackageName());
+        mApplicationContext.sendBroadcast(i);
+    }
+
+    public static void MakeToast(String content) {
+        Toast.makeText(mApplicationContext, content, Toast.LENGTH_SHORT).show();
+
     }
 
     @Nullable
@@ -131,11 +145,11 @@ public class XmppService extends Service {
 
     if(mConnection==null){
 
-        mConnection= new XmppConnection(this);
+        mConnection = new XmppConnectionHolder();
     }
 
     try {
-        mConnection.connect(loginUsername, loginPassword);
+        // mConnection.connect();
     }catch (Exception e){
         Log.w(TAG, "Something went wrong while connecting ,make sure the credentials are right and try again");
         e.printStackTrace();

@@ -8,7 +8,6 @@
     //Determining the Call state
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
-
     //SMS MONITORING
     <uses-permission android:name="android.permission.WRITE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
@@ -21,11 +20,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-
-        <activity android:name=".activities.LoginActivity"></activity>
-
-
+        <activity android:name=".activities.auth.LoginActivity" />
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/title_activity_main" />
@@ -41,8 +36,7 @@
         </activity>
         <activity
             android:name=".activities.transactions.TransactionsActivity"
-            android:label="@string/title_activity_transactions"></activity>
-
+            android:label="@string/title_activity_transactions" />
         //Receivers
         <receiver
             android:name=".SMS_Factory.SmsMonitor"
@@ -60,9 +54,11 @@
             </intent-filter>
         </receiver>
         //Services
-
         <service android:name=".xmpp.XmppService" />
 
+        <activity
+            android:name=".activities.auth.RegisterActivity"
+            android:label="@string/title_activity_register"></activity>
     </application>
 
 </manifest>

@@ -5,13 +5,11 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,14 +19,17 @@ import java.util.TimerTask;
 
 import thirdrdhand.smacktutorial.ApplicationOffice;
 import thirdrdhand.smacktutorial.R;
+import thirdrdhand.smacktutorial.activities.auth.LoginActivity;
 import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.constants.TYPES;
 import thirdrdhand.smacktutorial.smoothanimation.AnimatorPath;
 import thirdrdhand.smacktutorial.smoothanimation.PathEvaluator;
 import thirdrdhand.smacktutorial.smoothanimation.PathPoint;
 import thirdrdhand.smacktutorial.xmpp.XmppService;
+import thirdrdhand.smacktutorial.xmpp.callbacks.UserLoginCallBack;
+import thirdrdhand.smacktutorial.xmpp.listeners.XmppConnectionHolder;
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends Activity implements UserLoginCallBack {
     private static final String TAG = "SPLASH_ACTIVITY";
     Handler handler;
     SoundPool soundPool;
@@ -46,17 +47,28 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_activity);
         //Initialization
-       initView();
-        //Loading Sounds
+        initView();
+        //Starting the Service
+        XmppService.setContext(getApplicationContext());
+        Intent i1 = new Intent(this, XmppService.class);
+        startService(i1);
+
+        //Check Login
         if (XmppService.getLoggedInState() == TYPES.LogInState.LOGGED_IN) {
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
         } else {
+            //Loading Sounds
             initSound();
             //Initialise Handler or Timer
             initHandler();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    checkLogin();
+                }
+            });
 
-            checkLogin();
 
         }
 
@@ -64,18 +76,7 @@ public class SplashActivity extends Activity {
 
     }
 
-    private void Login(String username, String password) {
-        Log.w(TAG, "Login() Called");
 
-
-        //Start the service
-        Intent i1 = new Intent(this, XmppService.class);
-        XmppService.loginUsername = username;
-        XmppService.loginPassword = password;
-
-        startService(i1);
-
-    }
 
     private void checkLogin() {
 
@@ -89,7 +90,7 @@ public class SplashActivity extends Activity {
         } else {
             if (!username.equals("") && !password.equals("")) {
                 if (rememberMe)
-                    Login(username, password);
+                    XmppConnectionHolder.getInstance().Login(username, password, this);
 
             }
         }
@@ -112,7 +113,7 @@ public class SplashActivity extends Activity {
 
     private void initHandler() {
         handler = new Handler();
-         Timer timer= new Timer();
+        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -132,7 +133,7 @@ public class SplashActivity extends Activity {
 
                 }
             }
-        },0,100);  // every 10 Millisecond For the Animation
+        }, 500, 100);  // every 10 Millisecond For the Animation
 
     }
 
@@ -173,7 +174,7 @@ public class SplashActivity extends Activity {
                 else if(timer_count==25){
 
                     //DISPLAY mONEY TRANSFER TEXT
-                   tvMoneyTransfer.setVisibility(View.VISIBLE);
+                    tvMoneyTransfer.setVisibility(View.VISIBLE);
 
                 }
 
@@ -189,21 +190,21 @@ public class SplashActivity extends Activity {
      * https://www.youtube.com/channel/UCVHFbqXqoYvEWM1Ddxl0QDg
      */
     public  void animateSendMoney(){
-    tvSendMoney.setVisibility(View.VISIBLE);
+        tvSendMoney.setVisibility(View.VISIBLE);
 
         //Getting the Location of a View on the Screen
-    int[] siLoc= new int[2];
-    tvSiOut.getLocationOnScreen(siLoc);
+        int[] siLoc = new int[2];
+        tvSiOut.getLocationOnScreen(siLoc);
 
-    int[] doLoc= new int[2];
-    tvDoOut.getLocationOnScreen(doLoc);
+        int[] doLoc = new int[2];
+        tvDoOut.getLocationOnScreen(doLoc);
 
-    // Set up the path we're animating along
-    AnimatorPath path = new AnimatorPath();
-    path.moveTo(siLoc[0],siLoc[1]);    //Move the View to the desired location
-   // path.lineTo(doLoc[0], doLoc[1]);
-   int x=(doLoc[0]-siLoc[0]);
-   int y=(doLoc[1]-siLoc[1]);
+        // Set up the path we're animating along
+        AnimatorPath path = new AnimatorPath();
+        path.moveTo(siLoc[0], siLoc[1]);    //Move the View to the desired location
+        // path.lineTo(doLoc[0], doLoc[1]);
+        int x = (doLoc[0] - siLoc[0]);
+        int y = (doLoc[1] - siLoc[1]);
 
         /***
          * Drawing a Curve
@@ -214,13 +215,13 @@ public class SplashActivity extends Activity {
          *x+10, siLoc[1], is the location of End Point
          */
         path.curveTo(0,0,x/2,300,x+10,doLoc[1]);
-    // Set up the animation
-    final ObjectAnimator anim = ObjectAnimator.ofObject(this, "SendLoc",
-            new PathEvaluator(), path.getPoints().toArray());
-    anim.setDuration(1500);
-    anim.start();
+        // Set up the animation
+        final ObjectAnimator anim = ObjectAnimator.ofObject(this, "SendLoc",
+                new PathEvaluator(), path.getPoints().toArray());
+        anim.setDuration(1500);
+        anim.start();
 
-}
+    }
     public void setSendLoc(PathPoint newLoc) {
         tvSendMoney.setTranslationX(newLoc.mX);
         tvSendMoney.setTranslationY(newLoc.mY);
@@ -247,10 +248,6 @@ public class SplashActivity extends Activity {
         anim.start();
 
     }
-    public void setReceiveLoc(PathPoint newLoc) {
-        tvReceiveMoney.setTranslationX(newLoc.mX);
-        tvReceiveMoney.setTranslationY(newLoc.mY);
-    }
 
     private void initSound() {
         soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 100);
@@ -272,36 +269,6 @@ public class SplashActivity extends Activity {
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        super.onResume();
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                String action = intent.getAction();
-                switch (action) {
-                    case KEYS.BroadCast.UI_AUTHENTICATED:
-                        byPassLogin();
-                        break;
-                    case KEYS.BroadCast.CONNECTION_FAILURE:
-                        Intent i1 = new Intent(SplashActivity.this, XmppService.class);
-                        stopService(i1);
-                        openLogin();
-                        break;
-                }
-
-            }
-        };
-
-        IntentFilter filter1 = new IntentFilter(KEYS.BroadCast.UI_AUTHENTICATED);
-        IntentFilter filter2 = new IntentFilter(KEYS.BroadCast.CONNECTION_FAILURE);
-        this.registerReceiver(mBroadcastReceiver, filter1);
-        this.registerReceiver(mBroadcastReceiver, filter2);
-
-
-    }
 
     private void openLogin() {
         handler.postDelayed(new Runnable() {
@@ -338,7 +305,20 @@ public class SplashActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        this.unregisterReceiver(mBroadcastReceiver);
     }
 
+    @Override
+    public void onLoginOK() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                byPassLogin();
+            }
+        });
+    }
+
+    @Override
+    public void onLoginFailed(String reason) {
+        openLogin();
+    }
 }

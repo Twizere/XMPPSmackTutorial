@@ -1,6 +1,5 @@
 package thirdrdhand.smacktutorial.xmpp.listeners;
 
-import android.os.Handler;
 import android.util.Log;
 
 import org.jivesoftware.smack.chat2.Chat;
@@ -22,7 +21,6 @@ import thirdrdhand.smacktutorial.xmpp.XmppService;
 
 public class MessageListener implements IncomingChatMessageListener {
     private static final String TAG = "MESSAGE_LISTENER";
-    Handler handler = new Handler();
 
     @Override
     public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {

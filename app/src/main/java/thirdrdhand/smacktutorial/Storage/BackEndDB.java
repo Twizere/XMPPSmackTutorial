@@ -117,7 +117,7 @@ public class BackEndDB {
 
 
         private void dropTable(SQLiteDatabase db) {
-            String sql = "DROP TABLE IF EXISTS " + DB_NAME;
+            String sql = "DROP TABLE IF EXISTS " + ReceivedMessage.TABLE_NAME;
             db.execSQL(sql);
         }
 

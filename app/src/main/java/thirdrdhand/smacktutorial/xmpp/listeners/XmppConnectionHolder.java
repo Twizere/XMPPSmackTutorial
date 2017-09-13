@@ -1,7 +1,6 @@
 package thirdrdhand.smacktutorial.xmpp.listeners;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
@@ -26,18 +25,23 @@ import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.sasl.provided.SASLDigestMD5Mechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smackx.iqregister.AccountManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
 import org.jivesoftware.smackx.xhtmlim.packet.XHTMLExtension;
 import org.jxmpp.jid.DomainBareJid;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.jid.parts.Localpart;
+import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import thirdrdhand.smacktutorial.activities.auth.AuthUser;
 import thirdrdhand.smacktutorial.constants.CREDENTIALS;
 import thirdrdhand.smacktutorial.constants.KEYS;
 import thirdrdhand.smacktutorial.constants.TYPES;
@@ -46,6 +50,8 @@ import thirdrdhand.smacktutorial.xmpp.callbacks.MessageReceiveivedListener;
 import thirdrdhand.smacktutorial.xmpp.callbacks.MsgIdListenerBox;
 import thirdrdhand.smacktutorial.xmpp.callbacks.MsgIdReceiptBox;
 import thirdrdhand.smacktutorial.xmpp.callbacks.SendMessageListener;
+import thirdrdhand.smacktutorial.xmpp.callbacks.UserLoginCallBack;
+import thirdrdhand.smacktutorial.xmpp.callbacks.UserRegistrationCallBack;
 import thirdrdhand.smacktutorial.xmpp.interceptors.MessageInterceptor;
 import thirdrdhand.smacktutorial.xmpp.tools.XmppTools;
 
@@ -58,14 +64,14 @@ import static thirdrdhand.smacktutorial.constants.CREDENTIALS.Server.getHost;
  * Created by pacit on 2017/08/14.
  */
 
-public class XmppConnection implements ConnectionListener {
-    private static final String TAG = "XmppConnection";
+public class XmppConnectionHolder implements ConnectionListener {
+    private static final String TAG = "XmppConnectionHolder";
     private static final StanzaFilter MESSAGE_FILTER = new AndFilter(
             MessageTypeFilter.NORMAL_OR_CHAT,
             new OrFilter(MessageWithBodiesFilter.INSTANCE), new StanzaExtensionFilter(XHTMLExtension.ELEMENT, XHTMLExtension.NAMESPACE),
             new OrFilter(MessageWithBodiesFilter.INSTANCE, new StanzaExtensionFilter(XHTMLExtension.ELEMENT, XHTMLExtension.NAMESPACE))
     );
-    public   final Context mApplicationContext;
+    private static XmppConnectionHolder instance;
     public List<MsgIdReceiptBox> msgIdReceiptBoxList;
     public List<MsgIdListenerBox> msgIdListenerBoxList;
     public XMPPTCPConnection mConnection;
@@ -73,25 +79,37 @@ public class XmppConnection implements ConnectionListener {
     public TYPES.LogInState mLoginState;
     DeliveryReceiptManager deliveryReceiptManager;
     ChatManager mChatManager;
-    public XmppConnection(Context context) {
+    private AccountManager mAccountManager;
+
+    public XmppConnectionHolder() {
         Log.w(TAG, "Connection Constructor called");
-        mApplicationContext = context.getApplicationContext();
         msgIdListenerBoxList = new ArrayList<MsgIdListenerBox>();
         msgIdReceiptBoxList = new ArrayList<MsgIdReceiptBox>();
+        instance = this;
+
     }
 
+    public static XmppConnectionHolder getInstance() {
+        if (instance == null)
+            new XmppConnectionHolder();
+        return instance;
+    }
+
+    public AccountManager getAccountManager() throws InterruptedException, XMPPException, SmackException, IOException {
+        if (mAccountManager == null)
+            mAccountManager = AccountManager.getInstance(mConnection);
+        return mAccountManager;
+    }
+
+    public XMPPTCPConnection connect() throws IOException, InterruptedException, XMPPException, SmackException {
 
 
-    public void connect(String username, String password) throws IOException, SmackException, XMPPException, InterruptedException {
-        Log.w(TAG, "connectting to Server : " + getDomain());
+        mConnection = connect(Username == null ? "test" : Username, Password == null ? "test" : Password);
 
-        CREDENTIALS.Server.generateServerConfig();
+        return mConnection;
+    }
 
-        if (!amIconnected()) {
-            connectionFailure();
-            return;
-        }
-
+    private XMPPTCPConnectionConfiguration.Builder getTestBuilder(String username, String password) throws XmppStringprepException, UnknownHostException {
         DomainBareJid domainBareJid = JidCreate.domainBareFrom(getDomain());
         XMPPTCPConnectionConfiguration.Builder builder=
                 XMPPTCPConnectionConfiguration.builder();
@@ -100,46 +118,79 @@ public class XmppConnection implements ConnectionListener {
         builder.setUsernameAndPassword(username, password);
         builder.setResource("resource");
         builder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+        return builder;
+    }
 
-        mConnection = new XMPPTCPConnection(builder.build());
+    public XMPPTCPConnection connect(String username, String password) throws IOException, SmackException, XMPPException, InterruptedException {
+        if (!amIconnected()) {
+            connectionFailure();
+            return null;
+        }
+        if (mConnection != null) {
+            mConnection.disconnect();
+            mConnection.instantShutdown();
+            mConnection = null;
+        }
 
-        //
+        Log.w(TAG, "connectting to Server : " + getDomain());
+        CREDENTIALS.Server.generateServerConfig();
+        mConnection = new XMPPTCPConnection(getTestBuilder(username, password).build());
         mConnection.addConnectionListener(this);
-        //
+
         mConnection.connect();
-
-        SASLMechanism mechanism = new SASLDigestMD5Mechanism();
-        SASLAuthentication.registerSASLMechanism(mechanism);
-        SASLAuthentication.blacklistSASLMechanism("SCRAM-SHA-1");
-        SASLAuthentication.unBlacklistSASLMechanism("DIGEST-MD5");
-
-        mConnection.login();
-
-
-        //
-
-
         ReconnectionManager reconnectionManager= ReconnectionManager.getInstanceFor(mConnection);
         reconnectionManager.setEnabledPerDefault(true);
         reconnectionManager.enableAutomaticReconnection();
+        mAccountManager = AccountManager.getInstance(mConnection);
+        return mConnection;
 
+    }
 
-        mChatManager = ChatManager.getInstanceFor(mConnection);
-        mChatManager.addIncomingListener(new MessageListener());
-        mChatManager.addOutgoingListener(new MessageInterceptor());
-        mConnection.addPacketSendingListener(new MessageInterceptor(), MESSAGE_FILTER);
+    public void Login(final String username, final String password, final UserLoginCallBack callback) {
 
+        Thread th = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //Checking The Connection
+                    if (mLoginState == TYPES.LogInState.LOGGED_IN) {
+                        if (callback != null)
+                            callback.onLoginFailed("Already LoggenIn Logout First");
+                        return;
+                    }
 
+                    mConnection = getInstance().connect(username, password);
 
+                    if (mConnectionStatus == TYPES.ConnectionState.CONNECTED) {
 
+                        SASLMechanism mechanism = new SASLDigestMD5Mechanism();
+                        SASLAuthentication.registerSASLMechanism(mechanism);
+                        SASLAuthentication.blacklistSASLMechanism("SCRAM-SHA-1");
+                        SASLAuthentication.unBlacklistSASLMechanism("DIGEST-MD5");
 
-        //Adding
-        Username = username;
-        Password = password;
+                        mConnection.login();
+
+                        mChatManager = ChatManager.getInstanceFor(mConnection);
+                        mChatManager.addIncomingListener(new MessageListener());
+                        mChatManager.addOutgoingListener(new MessageInterceptor());
+                        mConnection.addPacketSendingListener(new MessageInterceptor(), MESSAGE_FILTER);
+                        //Adding
+                        Username = username;
+                        Password = password;
+                        if (callback != null) callback.onLoginOK();
+                    }
+
+                } catch (Exception e) {
+
+                    if (callback != null) callback.onLoginFailed(e.getMessage());
+                }
+            }
+        });
+        th.start();
     }
 
     private boolean amIconnected() {
-        ConnectivityManager conMgr = (ConnectivityManager) mApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager conMgr = (ConnectivityManager) XmppService.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         if (conMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED
                 || conMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
@@ -167,6 +218,7 @@ public class XmppConnection implements ConnectionListener {
 
         mConnection=null;
     }
+
     @Override
     public void connected(XMPPConnection connection) {
             mConnectionStatus= TYPES.ConnectionState.CONNECTED;
@@ -180,15 +232,8 @@ public class XmppConnection implements ConnectionListener {
         mLoginState = TYPES.LogInState.LOGGED_IN;
         Log.w(TAG, "AUTHENTICATED successfully");
 
-        showMainActivity();
+        XmppService.showMainActivity();
     }
-
-    public void showMainActivity() {
-        Intent i = new Intent(KEYS.BroadCast.UI_AUTHENTICATED);
-        i.setPackage(mApplicationContext.getPackageName());
-        mApplicationContext.sendBroadcast(i);
-    }
-
 
     @Override
     public void connectionClosed() {
@@ -206,9 +251,8 @@ public class XmppConnection implements ConnectionListener {
     }
 
     public void connectionFailure() {
-        Intent i = new Intent(KEYS.BroadCast.CONNECTION_FAILURE);
-        i.setPackage(mApplicationContext.getPackageName());
-        mApplicationContext.sendBroadcast(i);
+        XmppService.broadCastXmppInfo(KEYS.BroadCast.CONNECTION_FAILURE);
+
     }
 
     @Override
@@ -273,6 +317,27 @@ public class XmppConnection implements ConnectionListener {
 
     }
 
+    public void RegisterUser(final AuthUser user, final UserRegistrationCallBack userRegistrationCallBack) {
+        Thread reg = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    connect();
+                    getAccountManager();
+                    mAccountManager.sensitiveOperationOverInsecureConnection(true);
+                    mAccountManager.createAccount(Localpart.from(user.Username), user.Password);
+                    userRegistrationCallBack.onRegisterOK();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    userRegistrationCallBack.onRegisterFailed(e.getMessage());
+
+                }
+
+            }
+        });
+        reg.start();
+    }
 }
 
 
